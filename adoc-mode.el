@@ -248,6 +248,13 @@ See for example `tempo-template-adoc-title-1'."
                  (const :tag "tempo-snippets" tempo-snippets))
   :group 'adoc)
 
+(defcustom adoc-imenu-indent-by-level nil
+  "Indent imenu list by title level if t"
+  :type '(choice (const nil)
+                 (const t)
+                 number)
+  :group 'adoc)
+
 
 ;;;; faces / font lock
 (define-obsolete-face-alias 'adoc-orig-default 'adoc-align "23.3")
@@ -2660,12 +2667,14 @@ LOCAL-ATTRIBUTE-FACE-ALIST before it is looked up in
       (while (re-search-forward re-all-titles nil t)
         (backward-char) ; skip backwards the trailing \n of a title
         (let* ((descriptor (adoc-title-descriptor t))
+               (level (nth 2 descriptor))
                (title-text (nth 3 descriptor))
                (title-pos (nth 4 descriptor)))
           (unless (null title-text)
-            (setq
-             index-alist
-             (cons (cons title-text title-pos) index-alist))))))
+            (let ((indent (and adoc-imenu-indent-by-level (make-string level 32))))
+              (setq
+               index-alist
+               (cons (cons (concat indent title-text) title-pos) index-alist)))))))
     (nreverse index-alist)))
 
 (defvar adoc-mode-syntax-table
